@@ -14,10 +14,5 @@ This project is made to compare different biologically inspired algorithms like 
 
 ### Installation
 ```bash
-# Clone with datasets 
 git clone https://github.com/milagjurovska/PPI-link-prediction-with-optimized-gcn-and-gan.git
 cd PPI-link-prediction-with-optimized-gcn-and-gan
-
-# Install PyTorch Geometric dependencies
-pip install torch-scatter torch-sparse torch-cluster torch-spline-conv -f https://data.pyg.org/whl/torch-2.0.0+cu117.html
-pip install torch-geometric
