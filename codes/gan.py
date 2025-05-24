@@ -30,17 +30,26 @@ class Discriminator(nn.Module):
         self.lin3 = nn.Linear(64, 1)
         self.dropout = nn.Dropout(0.3)
 
-    def forward(self, z, edge_index):
-        src = z[edge_index[0]]
-        dst = z[edge_index[1]]
-        edge_feats = torch.cat([src, dst], dim=1)
+    def forward(self, z, edge_index=None, edge_feats=None):
+        if edge_feats is None:
+            src = z[edge_index[0]]
+            dst = z[edge_index[1]]
+            edge_feats = torch.cat([src, dst], dim=1)
         h = F.leaky_relu(self.lin1(edge_feats), 0.2)
         h = self.dropout(h)
         h = F.leaky_relu(self.lin2(h), 0.2)
         return self.lin3(h)
 
+def init_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
+        nn.init.constant_(m.bias, 0)
+
 generator = Generator(in_channels=5, hidden_channels=256).to(device)
 discriminator = Discriminator(hidden_channels=256).to(device)
+
+generator.apply(init_weights)
+discriminator.apply(init_weights)
 
 optimizer_G = optim.Adam(generator.parameters(), lr=1e-4, betas=(0.5, 0.999))
 optimizer_D = optim.Adam(discriminator.parameters(), lr=1e-4, betas=(0.5, 0.999))
@@ -50,27 +59,38 @@ def GANtrain():
     generator.train()
     discriminator.train()
 
-    z = generator.encode(train_data.x)
+    x = train_data.x.to(device)
+    edge_label_index = train_data.edge_label_index.to(device)
+    edge_label = train_data.edge_label.to(device)
 
-    pos_edge_index = train_data.edge_label_index[:, train_data.edge_label == 1]
-    neg_edge_index = train_data.edge_label_index[:, train_data.edge_label == 0]
+    z = generator.encode(x)
 
-    for _ in range(5):
+    pos_edge_index = edge_label_index[:, edge_label == 1]
+    neg_edge_index = edge_label_index[:, edge_label == 0]
+
+    for i in range(5):
         optimizer_D.zero_grad()
 
-        pos_pred = discriminator(z.detach(), pos_edge_index)
-
-        neg_pred = discriminator(z.detach(), neg_edge_index)
+        pos_pred = discriminator(z, edge_index=pos_edge_index)
+        neg_pred = discriminator(z, edge_index=neg_edge_index)
 
         d_loss = -(torch.mean(pos_pred) - torch.mean(neg_pred))
 
+        # Gradient Penalty
         alpha = torch.rand(pos_edge_index.size(1), 1, device=device)
-        interpolates = (alpha * z[pos_edge_index[0]] +
-                        (1 - alpha) * z[neg_edge_index[0]]).requires_grad_(True)
-        disc_interpolates = discriminator(interpolates, pos_edge_index)
+        src_pos = z[pos_edge_index[0]]
+        dst_pos = z[pos_edge_index[1]]
+        src_neg = z[neg_edge_index[0]]
+        dst_neg = z[neg_edge_index[1]]
+
+        interpolated_src = (alpha * src_pos + (1 - alpha) * src_neg).requires_grad_(True)
+        interpolated_dst = (alpha * dst_pos + (1 - alpha) * dst_neg).requires_grad_(True)
+        interpolated_edges = torch.cat([interpolated_src, interpolated_dst], dim=1)
+
+        disc_interpolates = discriminator(z, edge_feats=interpolated_edges)
         gradients = torch.autograd.grad(
             outputs=disc_interpolates,
-            inputs=interpolates,
+            inputs=interpolated_edges,
             grad_outputs=torch.ones_like(disc_interpolates),
             create_graph=True,
             retain_graph=True
@@ -82,18 +102,23 @@ def GANtrain():
         optimizer_D.step()
 
     optimizer_G.zero_grad()
-    neg_pred = discriminator(z, neg_edge_index)
+    z = generator.encode(x)
+    neg_pred = discriminator(z, edge_index=neg_edge_index)
     g_loss = -torch.mean(neg_pred)
     g_loss.backward()
     optimizer_G.step()
 
     return d_loss.item(), g_loss.item()
 
+
 @torch.no_grad()
 def GANtest(data):
     generator.eval()
-    z = generator.encode(data.x)
-    scores = discriminator(z, data.edge_label_index)
+    discriminator.eval()
+    x = data.x.to(device)
+    edge_label_index = data.edge_label_index.to(device)
+    z = generator.encode(x)
+    scores = discriminator(z, edge_index=edge_label_index)
     return torch.sigmoid(scores).cpu().numpy()
 
 
