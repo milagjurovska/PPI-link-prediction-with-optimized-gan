@@ -4,6 +4,15 @@ import torch
 from torch_geometric.nn import GCNConv
 import torch.optim as optim
 import numpy as np
+import torch.nn.functional as F
+
+search_space = {
+    "hidden_channels": [32, 64, 128, 256],
+    "lr": [0.0001, 0.001, 0.01, 0.1],
+    "num_layers": [2, 3, 4],
+    "dropout": [0.0, 0.3, 0.5, 0.7]
+}
+
 
 def decode(z, edge_label_index):
     src = z[edge_label_index[0]]
@@ -12,21 +21,28 @@ def decode(z, edge_label_index):
 
 
 class GCNLinkPredictor(torch.nn.Module):
-    def __init__(self, in_channels, hidden_channels):
+    def __init__(self, in_channels, hidden_channels, num_layers=2, dropout=0.5):
         super().__init__()
-        self.conv1 = GCNConv(in_channels, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        self.layers = torch.nn.ModuleList()
+        self.layers.append(GCNConv(in_channels, hidden_channels))
+        for _ in range(num_layers - 2):
+            self.layers.append(GCNConv(hidden_channels, hidden_channels))
+        self.layers.append(GCNConv(hidden_channels, hidden_channels))
+        self.dropout = dropout
 
     def encode(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        return self.conv2(x, edge_index)
+        for layer in self.layers[:-1]:
+            x = layer(x, edge_index)
+            x = F.relu(x)
+            x = F.dropout(x, p=self.dropout, training=self.training)
+        return self.layers[-1](x, edge_index)
 
 
 model = GCNLinkPredictor(in_channels=5, hidden_channels=256)
 optimizer = optim.Adam(model.parameters(), lr=0.01)
 
 
-def GCNtrain():
+def GCNtrain(model, optimizer, train_data):
     model.train()
     z = model.encode(train_data.x, train_data.edge_index)
     optimizer.zero_grad()
@@ -50,7 +66,7 @@ def GCNtrain():
 
 
 @torch.no_grad()
-def GCNtest(data):
+def GCNtest(model, data):
     model.eval()
     z = model.encode(data.x, data.edge_index)
     scores = decode(z, data.edge_label_index)
