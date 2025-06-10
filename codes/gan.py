@@ -13,13 +13,10 @@ class Generator(nn.Module):
     def __init__(self, in_channels, hidden_channels):
         super().__init__()
         self.lin1 = nn.Linear(in_channels, hidden_channels)
-        self.lin2 = nn.Linear(hidden_channels, hidden_channels)
         self.dropout = nn.Dropout(0.2)
 
     def encode(self, x):
-        x = F.leaky_relu(self.lin1(x), 0.2)
-        x = self.dropout(x)
-        return self.lin2(x)
+        return F.leaky_relu(self.lin1(x), 0.2)
 
 
 class Discriminator(nn.Module):
@@ -55,7 +52,7 @@ optimizer_G = optim.Adam(generator.parameters(), lr=1e-4, betas=(0.5, 0.999))
 optimizer_D = optim.Adam(discriminator.parameters(), lr=1e-4, betas=(0.5, 0.999))
 
 
-def GANtrain():
+def GANtrain(generator, discriminator, optimizer_G, optimizer_D, train_data):
     generator.train()
     discriminator.train()
 
@@ -76,7 +73,6 @@ def GANtrain():
 
         d_loss = -(torch.mean(pos_pred) - torch.mean(neg_pred))
 
-        # Gradient Penalty
         alpha = torch.rand(pos_edge_index.size(1), 1, device=device)
         src_pos = z[pos_edge_index[0]]
         dst_pos = z[pos_edge_index[1]]
@@ -110,17 +106,15 @@ def GANtrain():
 
     return d_loss.item(), g_loss.item()
 
-
 @torch.no_grad()
-def GANtest(data):
+def GANtest(generator, discriminator, test_data):
     generator.eval()
     discriminator.eval()
-    x = data.x.to(device)
-    edge_label_index = data.edge_label_index.to(device)
+    x = test_data.x.to(device)
+    edge_label_index = test_data.edge_label_index.to(device)
     z = generator.encode(x)
     scores = discriminator(z, edge_index=edge_label_index)
     return torch.sigmoid(scores).cpu().numpy()
-
 
 def find_optimal_threshold(labels, probs):
     if torch.is_tensor(probs):
@@ -138,7 +132,6 @@ def find_optimal_threshold(labels, probs):
             best_f1 = f1
             best_thresh = thresh
     return best_thresh
-
 
 def evaluate_model(test_probs, test_labels):
     if torch.is_tensor(test_probs):
