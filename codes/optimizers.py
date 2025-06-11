@@ -1,7 +1,7 @@
 from niapy.problems import Problem
 from niapy.task import Task
 from niapy.algorithms.basic import GeneticAlgorithm, ParticleSwarmOptimization, ArtificialBeeColonyAlgorithm
-from niapy.algorithms.other import SimulatedAnnealing
+from niapy.algorithms.other import SimulatedAnnealing, HillClimbAlgorithm, RandomSearch
 from gcn import *
 from gan import *
 from data_processing import train_data, test_data
@@ -148,6 +148,49 @@ def run_gcn_sa():
         "auc": problem.last_auc,
         "loss": problem.last_loss
     }
+
+def run_gcn_hc():
+    problem = GCNHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = HillClimbAlgorithm(
+        delta=0.1
+    )
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "num_layers": int(best_solution[2]),
+            "dropout": best_solution[3]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
+def run_gcn_ra():
+    problem = GCNHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = RandomSearch()
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "num_layers": int(best_solution[2]),
+            "dropout": best_solution[3]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
 
 
 class GANHyperparameterProblem(Problem):
