@@ -1,22 +1,22 @@
-from data_processing import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from sklearn.metrics import f1_score, roc_auc_score
 import numpy as np
+from torch_geometric.nn import GCNConv
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
 class Generator(nn.Module):
     def __init__(self, in_channels, hidden_channels):
         super().__init__()
-        self.lin1 = nn.Linear(in_channels, hidden_channels)
+        self.conv1 = GCNConv(in_channels, hidden_channels)
         self.dropout = nn.Dropout(0.2)
 
-    def encode(self, x):
-        return F.leaky_relu(self.lin1(x), 0.2)
+    def encode(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        return F.leaky_relu(x, 0.2)
 
 
 class Discriminator(nn.Module):
@@ -57,51 +57,44 @@ def GANtrain(generator, discriminator, optimizer_G, optimizer_D, train_data):
     discriminator.train()
 
     x = train_data.x.to(device)
+    edge_index = train_data.edge_index.to(device)
+    z = generator.encode(x, edge_index)
+
     edge_label_index = train_data.edge_label_index.to(device)
     edge_label = train_data.edge_label.to(device)
 
-    z = generator.encode(x)
+    for i in range(2):
+        BATCH_SIZE = 1024
 
-    pos_edge_index = edge_label_index[:, edge_label == 1]
-    neg_edge_index = edge_label_index[:, edge_label == 0]
+        pos_idx = torch.where(edge_label == 1)[0]
+        neg_idx = torch.where(edge_label == 0)[0]
 
-    for i in range(5):
+        pos_sample = pos_idx[torch.randperm(len(pos_idx))[:BATCH_SIZE]]
+        neg_sample = neg_idx[torch.randperm(len(neg_idx))[:BATCH_SIZE]]
+
+        pos_edge_index = edge_label_index[:, pos_sample]
+        neg_edge_index = edge_label_index[:, neg_sample]
+
+        z = generator.encode(x, edge_index)
+
         optimizer_D.zero_grad()
-
         pos_pred = discriminator(z, edge_index=pos_edge_index)
         neg_pred = discriminator(z, edge_index=neg_edge_index)
+        d_loss = -(pos_pred.mean() - neg_pred.mean())
 
-        d_loss = -(torch.mean(pos_pred) - torch.mean(neg_pred))
-
-        alpha = torch.rand(pos_edge_index.size(1), 1, device=device)
-        src_pos = z[pos_edge_index[0]]
-        dst_pos = z[pos_edge_index[1]]
-        src_neg = z[neg_edge_index[0]]
-        dst_neg = z[neg_edge_index[1]]
-
-        interpolated_src = (alpha * src_pos + (1 - alpha) * src_neg).requires_grad_(True)
-        interpolated_dst = (alpha * dst_pos + (1 - alpha) * dst_neg).requires_grad_(True)
-        interpolated_edges = torch.cat([interpolated_src, interpolated_dst], dim=1)
-
-        disc_interpolates = discriminator(z, edge_feats=interpolated_edges)
-        gradients = torch.autograd.grad(
-            outputs=disc_interpolates,
-            inputs=interpolated_edges,
-            grad_outputs=torch.ones_like(disc_interpolates),
-            create_graph=True,
-            retain_graph=True
-        )[0]
-        gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
-        d_loss += 10 * gradient_penalty
-
-        d_loss.backward(retain_graph=True)
+        d_loss.backward()
         optimizer_D.step()
 
+        optimizer_G.zero_grad()
+        z = generator.encode(x, edge_index)
+        neg_pred = discriminator(z, edge_index=neg_edge_index)
+        g_loss = -neg_pred.mean()
+        g_loss.backward()
+        optimizer_G.step()
+
     optimizer_G.zero_grad()
-    z = generator.encode(x)
     neg_pred = discriminator(z, edge_index=neg_edge_index)
     g_loss = -torch.mean(neg_pred)
-    g_loss.backward()
     optimizer_G.step()
 
     return d_loss.item(), g_loss.item()
@@ -111,8 +104,9 @@ def GANtest(generator, discriminator, test_data):
     generator.eval()
     discriminator.eval()
     x = test_data.x.to(device)
+    edge_index = test_data.edge_index.to(device)
     edge_label_index = test_data.edge_label_index.to(device)
-    z = generator.encode(x)
+    z = generator.encode(x, edge_index)
     scores = discriminator(z, edge_index=edge_label_index)
     return torch.sigmoid(scores).cpu().numpy()
 

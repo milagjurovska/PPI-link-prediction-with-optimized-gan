@@ -6,14 +6,6 @@ import torch.optim as optim
 import numpy as np
 import torch.nn.functional as F
 
-search_space = {
-    "hidden_channels": [32, 64, 128, 256],
-    "lr": [0.0001, 0.001, 0.01, 0.1],
-    "num_layers": [2, 3, 4],
-    "dropout": [0.0, 0.3, 0.5, 0.7]
-}
-
-
 def decode(z, edge_label_index):
     src = z[edge_label_index[0]]
     dst = z[edge_label_index[1]]

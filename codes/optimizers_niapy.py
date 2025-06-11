@@ -191,8 +191,6 @@ def run_gcn_ra():
         "loss": problem.last_loss
     }
 
-
-
 class GANHyperparameterProblem(Problem):
     def __init__(self):
         super().__init__(
@@ -258,10 +256,122 @@ def run_gan_ga():
         "best_params": {
             "hidden_channels": int(best_solution[0]),
             "lr": best_solution[1],
-            "dropout": best_solution[3]
+            "dropout": best_solution[2]
         },
-        "f1": -best_solution.fitness,
+        "f1": -best_score,
         "auc": problem.last_auc,
         "loss": problem.last_loss
     }
+
+
+def run_gan_pso():
+    problem = GANHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = ParticleSwarmOptimization(
+        population_size=10,
+        c1=2.0,
+        c2=2.0,
+        w=0.7
+    )
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "dropout": best_solution[2]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
+def run_gan_abc():
+    problem = GANHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = ArtificialBeeColonyAlgorithm(
+        population_size=10,
+        limit=100
+    )
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "dropout": best_solution[2]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
+
+def run_gan_sa():
+    problem = GANHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = SimulatedAnnealing(
+        t_min=0.001,
+        t_max=1000.0,
+        alpha=0.95
+    )
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "dropout": best_solution[2]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
+def run_gan_hc():
+    problem = GANHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = HillClimbAlgorithm(
+        delta=0.1
+    )
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "dropout": best_solution[2]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
+def run_gan_ra():
+    problem = GANHyperparameterProblem()
+    task = Task(problem=problem, max_evals=30)
+
+    algo = RandomSearch()
+
+    best_solution, best_score = algo.run(task)
+
+    return {
+        "best_params": {
+            "hidden_channels": int(best_solution[0]),
+            "lr": best_solution[1],
+            "dropout": best_solution[2]
+        },
+        "f1": -best_score,
+        "auc": problem.last_auc,
+        "loss": problem.last_loss
+    }
+
 
