@@ -24,8 +24,11 @@ This image was done using <a href="https://cytoscape.org/">Cytoscape</a>.
 
 ### Prerequisites
 - Python 3.8+
+- [scikit-learn](https://scikit-learn.org/stable/)
 - [PyTorch](https://pytorch.org/get-started/locally/) 
 - [PyTorch Geometric](https://pytorch-geometric.readthedocs.io)
+- [NiaPy](https://niapy.org/en/stable/index.html#niapy-s-documentation)
+- [scikit-optimize](https://scikit-optimize.github.io/stable/)
 
 ### Installation
 ```bash
