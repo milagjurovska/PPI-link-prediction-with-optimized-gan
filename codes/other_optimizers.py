@@ -60,8 +60,10 @@ def run_gcn_gs(train_data, test_data):
     }
 
     gcn_estimator = GCNWrapper()
-    grid_search = GridSearchCV(estimator=gcn_estimator, param_grid=param_grid, scoring='f1', cv=1)
-    grid_search.fit(X=[0], y=[0])
+    grid_search = GridSearchCV(estimator=gcn_estimator, param_grid=param_grid, scoring='f1', cv=3)
+    X_dummy = [[0], [1], [2]]
+    y_dummy = [0, 1, 0]
+    grid_search.fit(X=X_dummy, y=y_dummy)
 
     best_wrapper = grid_search.best_estimator_
 
@@ -132,8 +134,10 @@ def run_gan_gs(train_data, test_data):
     }
 
     gan_estimator = GANWrapper()
-    grid_search = GridSearchCV(estimator=gan_estimator, param_grid=param_grid, scoring='f1', cv=1)
-    grid_search.fit(X=[0], y=[0])
+    grid_search = GridSearchCV(estimator=gan_estimator, param_grid=param_grid, scoring='f1', cv=3)
+    X_dummy = [[0], [1], [2]]
+    y_dummy = [0, 1, 0]
+    grid_search.fit(X=X_dummy, y=y_dummy)
 
     best_wrapper = grid_search.best_estimator_
 

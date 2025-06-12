@@ -240,10 +240,10 @@ class GANHyperparameterProblem(Problem):
 
 def run_gan_ga():
     problem = GANHyperparameterProblem()
-    task = Task(problem=problem, max_evals=15)
+    task = Task(problem=problem, max_evals=30)
 
     algo = GeneticAlgorithm(
-        population_size=8,
+        population_size=10,
         crossover_rate=0.8,
         mutation_rate=0.2,
         max_evals=1,
