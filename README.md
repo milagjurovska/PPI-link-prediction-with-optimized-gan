@@ -51,7 +51,7 @@ These tables showcase the best hyperparameter results chosen with each algorithm
 
 <tbody>
   <tr><td rowspan="7" style="background-color:#e0e6f2;">GAN</td><td>f1</td><td>0.7277</td><td>0.8476</td><td>0.7497</td><td>0.748</td><td>0.6804</td><td>0.7494</td><td>0.7568</td><td>0.7743</td><td>0.7458</td><td>0.7499</td></tr>
-    <tr><td>auc</td><td>0.7345</td><td>0.915</td><td>0.554</td><td>0.5756</td><td>0.505</td><td>0.7725</td><td>0.7728</td><td>0.7727</td><td>0.7669</td><td>0.7702</td></tr>
+    <tr><td>auc</td><td>0.7345</td><td>0.5</td><td>0.554</td><td>0.5756</td><td>0.5</td><td>0.5</td><td>0.7725</td><td>0.7728</td><td>0.7669</td><td>0.7727</td></tr>
     <tr><td>average loss</td><td>0.0466</td><td>31.2233</td><td>0.0264</td><td>0.0275</td><td>-3.8527</td><td>-4.2903</td><td>0.0348</td><td>0.1738</td><td>0.1828</td><td>0.1771</td></tr>
     <tr><td>hidden channels</td><td>256</td><td>202</td><td>277</td><td>405</td><td>242</td><td>398</td><td>416</td><td>512</td><td>160</td><td>373</td></tr>
     <tr><td>learning rate</td><td>1e-4</td><td>0.00629</td><td>0.003</td><td>0.00276</td><td>1e-5</td><td>0.00158</td><td>0.0006</td><td>0.0002</td><td>0.00028</td><td>0.0006</td></tr>
