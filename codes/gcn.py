@@ -1,5 +1,4 @@
-from sklearn.metrics import f1_score, roc_auc_score
-from data_processing import *
+from sklearn.metrics import f1_score, roc_auc_score, ndcg_score
 import torch
 from torch_geometric.nn import GCNConv
 import torch.optim as optim
@@ -95,4 +94,6 @@ def evaluate_model(test_probs, test_labels):
     preds = (test_probs > optimal_threshold).astype(int)
     f1 = f1_score(test_labels, preds)
 
-    return auc, f1, optimal_threshold
+    ndcg = ndcg_score([test_labels], [test_probs])
+
+    return auc, f1, ndcg

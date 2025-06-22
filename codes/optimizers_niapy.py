@@ -19,6 +19,7 @@ class GCNHyperparameterProblem(Problem):
         self.last_f1 = None
         self.last_auc = None
         self.last_loss = None
+        self.last_ndcg = None
 
     def _evaluate(self, x):
         hidden_channels = int(x[0])
@@ -40,15 +41,16 @@ class GCNHyperparameterProblem(Problem):
             total_loss += loss
 
         test_probs = GCNtest(model, test_data)
-        auc, f1, _ = evaluate_model(test_probs, test_data.edge_label)
+        auc, f1, ndcg = evaluate_model(test_probs, test_data.edge_label)
 
         avg_loss = total_loss / 10
 
         self.last_f1 = f1
         self.last_auc = auc
         self.last_loss = avg_loss
+        self.last_ndcg = ndcg
 
-        return -f1
+        return -(0.6 * f1 + 0.3 * ndcg + 0.1 * auc)
 
 
 def run_gcn_ga():
@@ -73,7 +75,8 @@ def run_gcn_ga():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gcn_pso():
@@ -98,7 +101,8 @@ def run_gcn_pso():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gcn_abc():
@@ -121,7 +125,8 @@ def run_gcn_abc():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 
@@ -146,7 +151,8 @@ def run_gcn_sa():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gcn_hc():
@@ -168,7 +174,8 @@ def run_gcn_hc():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gcn_ra():
@@ -188,20 +195,22 @@ def run_gcn_ra():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 class GANHyperparameterProblem(Problem):
     def __init__(self):
         super().__init__(
             dimension=3,
-            lower=[64, 0.00001, 0.1],
-            upper=[512, 0.01, 0.5],
+            lower=[64, 0.00005, 0.1],
+            upper=[512, 0.002, 0.4],
             dtype=float
         )
         self.last_f1 = None
         self.last_auc = None
         self.last_loss = None
+        self.last_ndcg = None
 
     def _evaluate(self, x):
         hidden_channels = int(x[0])
@@ -228,15 +237,16 @@ class GANHyperparameterProblem(Problem):
             total_g_loss += g_loss
 
         test_probs = GANtest(generator, discriminator, test_data)
-        auc, f1, _ = evaluate_model(test_probs, test_data.edge_label)
+        auc, f1, ndcg = evaluate_model(test_probs, test_data.edge_label)
 
         avg_loss = (total_d_loss + total_g_loss) / 20
 
         self.last_f1 = f1
         self.last_auc = auc
         self.last_loss = avg_loss
+        self.last_ndcg=ndcg
 
-        return -f1
+        return -(0.6 * f1 + 0.3 * ndcg + 0.1 * auc)
 
 def run_gan_ga():
     problem = GANHyperparameterProblem()
@@ -246,7 +256,6 @@ def run_gan_ga():
         population_size=10,
         crossover_rate=0.8,
         mutation_rate=0.2,
-        max_evals=1,
         individual_type=Individual
     )
 
@@ -260,7 +269,8 @@ def run_gan_ga():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 
@@ -285,7 +295,8 @@ def run_gan_pso():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gan_abc():
@@ -307,7 +318,8 @@ def run_gan_abc():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 
@@ -331,7 +343,8 @@ def run_gan_sa():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gan_hc():
@@ -352,7 +365,8 @@ def run_gan_hc():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 def run_gan_ra():
@@ -371,7 +385,8 @@ def run_gan_ra():
         },
         "f1": -best_score,
         "auc": problem.last_auc,
-        "loss": problem.last_loss
+        "loss": problem.last_loss,
+        "ndcg": problem.last_ndcg
     }
 
 
