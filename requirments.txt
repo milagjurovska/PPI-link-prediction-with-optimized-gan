@@ -1,0 +1,11 @@
+numpy
+pandas
+scikit-learn
+networkx
+torch==2.0.1
+optuna
+deap
+jupyter
+notebook
+nbconvert
+niapy

@@ -50,7 +50,7 @@ class GCNHyperparameterProblem(Problem):
         self.last_loss = avg_loss
         self.last_ndcg = ndcg
 
-        return -(0.6 * f1 + 0.3 * ndcg + 0.1 * auc)
+        return -f1
 
 
 def run_gcn_ga():
@@ -137,7 +137,7 @@ def run_gcn_sa():
     algo = SimulatedAnnealing(
         t_min=0.001,
         t_max=1000.0,
-        alpha=0.95
+        alpha=0.99
     )
 
     best_solution, best_score = algo.run(task)
@@ -246,7 +246,7 @@ class GANHyperparameterProblem(Problem):
         self.last_loss = avg_loss
         self.last_ndcg=ndcg
 
-        return -(0.6 * f1 + 0.3 * ndcg + 0.1 * auc)
+        return -f1
 
 def run_gan_ga():
     problem = GANHyperparameterProblem()
@@ -330,7 +330,7 @@ def run_gan_sa():
     algo = SimulatedAnnealing(
         t_min=0.001,
         t_max=1000.0,
-        alpha=0.95
+        alpha=0.99
     )
 
     best_solution, best_score = algo.run(task)
