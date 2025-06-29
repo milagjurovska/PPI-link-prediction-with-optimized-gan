@@ -1,3 +1,4 @@
 *.ipynb linguist-detectable
 *.ipynb -linguist-vendored
 *.py linguist-detectable=true
+requirements.txt linguist-detectable=true
