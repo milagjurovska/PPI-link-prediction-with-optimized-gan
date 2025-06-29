@@ -1,4 +1,6 @@
-*.ipynb linguist-language=Python
+*.ipynb -linguist-documentation
+*.ipynb linguist-detectable
 
-*.py linguist-detectable
-__init__.py linguist-detectable
+*.py linguist-detectable=true
+__init__.py linguist-detectable=true
+requirements.txt linguist-detectable=true
