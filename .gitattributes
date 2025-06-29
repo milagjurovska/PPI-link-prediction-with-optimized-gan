@@ -1,0 +1,5 @@
+*.ipynb linguist-language=Python
+*.ipynb linguist-documentation=false
+
+*.py linguist-detectable=true
+__init__.py linguist-detectable=true
