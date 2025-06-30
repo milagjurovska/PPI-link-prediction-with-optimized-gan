@@ -32,3 +32,5 @@ This image was done using <a href="https://cytoscape.org/">Cytoscape</a>.
 ```bash
 git clone https://github.com/milagjurovska/PPI-link-prediction-with-optimized-gcn-and-gan.git
 cd PPI-link-prediction-with-optimized-gcn-and-gan
+```
+The results can be displayed in the Jupyter Notebook provided, however if you want to run the code in Python only, there is a results.py file.
