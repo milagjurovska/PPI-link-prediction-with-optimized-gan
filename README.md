@@ -39,7 +39,7 @@ The following results are obtained after 10 epochs of training in each GCN and G
     </tr>
   </thead>
   <tbody>
-    <tr><td rowspan="11">GCN</td><td>None</td><td>0.8071</td><td>0.8775</td><td>1.2861</td><td>0.9875</td><td>256</td><td>0.01</td><td>5</td><td>0</td><td>1m 19s</td></tr>
+    <tr><td rowspan="11">GCN</td><td>None</td><td>0.8071</td><td>0.8775</td><td>1.2861</td><td>0.9875</td><td>256</td><td>0.01</td><td>2</td><td>0</td><td>1m 19s</td></tr>
     <tr><td>GA</td><td>0.8506</td><td>0.9125</td><td>1.2876</td><td>0.9913</td><td>73</td><td>0.0122</td><td>3</td><td>0.4</td><td>9m 20s</td></tr>
     <tr><td>PSO</td><td>0.8506</td><td>0.779</td><td>1.392</td><td>0.968</td><td>107</td><td>0.01339</td><td>3</td><td>0.55</td><td>11m 56s</td></tr>
     <tr><td>ABC</td><td>0.8496</td><td>0.8831</td><td>1.4161</td><td>0.9885</td><td>106</td><td>0.00691</td><td>3</td><td>0.15</td><td>14m 28s</td></tr>
